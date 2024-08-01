@@ -1,0 +1,25 @@
+import pandas as pd
+
+# Load the original and export reports
+original_file = 'original_report.xlsx'
+export_file = 'export_report.xlsx'
+output_file = 'refreshed_report.xlsx'
+
+# Adjust sheet names or ranges as needed
+original_df = pd.read_excel(original_file, sheet_name='Sheet1')
+export_df = pd.read_excel(export_file, sheet_name='Sheet1')
+
+# Combine the dataframes
+combined_df = pd.concat([original_df, export_df])
+
+# Drop duplicates while keeping the first occurrence (original file)
+combined_df = combined_df.drop_duplicates(subset=combined_df.columns.difference(['Credited Date']))
+
+# Sort by 'Credited Employee', 'Opportunity ID', and 'Invoice Number'
+combined_df = combined_df.sort_values(by=['Credited Employee', 'Opportunity ID', 'Invoice Number', 'Credited Date'])
+
+# Remove rows where all values except 'Credited Date' are identical, keeping the one with the latest 'Credited Date'
+final_df = combined_df.drop_duplicates(subset=combined_df.columns.difference(['Credited Date']), keep='last')
+
+# Save the refreshed report
+final_df.to_excel(output_file, index=False)
